@@ -32,7 +32,7 @@
 body { background: var(--paper); color: var(--ink); font: 400 1.14rem/1.68 var(--body); margin: 0 }
 .plate { display: block; width: 100%; height: auto; margin: 0 }
 .hero { position: relative; background: #0d1114 }
-.hero img { display: block; width: 100%; height: auto; min-height: 300px; object-fit: cover; opacity: .94 }
+.hero img { display: block; width: 100%; height: clamp(180px, 34vh, 380px); object-fit: cover; object-position: center 35%; opacity: .94 }
 .hero-text { padding-block: 2.2rem 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
 .wrap { max-width: 41rem; margin-inline: auto }
 main { padding-block: 0 5rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
