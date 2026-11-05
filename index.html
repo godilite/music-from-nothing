@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Music From Nothing</title>
+<meta name="description" content="A physics graduate's interactive tutorial on what sound and music are, and how to compute an original film score from nothing with code. Every example plays in your browser.">
+<meta property="og:title" content="Music From Nothing">
+<meta property="og:description" content="A physics graduate's interactive tutorial on what sound and music are, and how to compute an original film score from nothing with code. Every example plays in your browser.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://godilite.github.io/music-from-nothing/">
+<meta property="og:image" content="https://godilite.github.io/music-from-nothing/img/winter-mountains.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column on snow-white or night paper, with full-width woodcut plates and instrument-like labs set into the text. */
+:root {
+  --paper: #f3f5f6; --ink: #14181b; --soft: #4d575e; --line: #c6ced3; --panel: #e6eaed; --panel-ink: #14181b;
+  --ice: #2f6f8f; --trace: #14181b; --code: #dfe4e8;
+  --display: "Bodoni Moda", "Didot", Georgia, serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0d1114; --ink: #e9eef1; --soft: #a4afb6; --line: #2d363c; --panel: #171d21; --panel-ink: #e9eef1;
+  --ice: #8cc3df; --trace: #e9eef1; --code: #1a2126; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0d1114; --ink: #e9eef1; --soft: #a4afb6; --line: #2d363c; --panel: #171d21; --panel-ink: #e9eef1;
+  --ice: #8cc3df; --trace: #e9eef1; --code: #1a2126; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font: 400 1.14rem/1.68 var(--body); margin: 0 }
+.plate { display: block; width: 100%; height: auto; margin: 0 }
+.hero { position: relative; background: #0d1114 }
+.hero img { display: block; width: 100%; height: auto; min-height: 300px; object-fit: cover; opacity: .94 }
+.hero-text { padding-block: 2.2rem 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.wrap { max-width: 41rem; margin-inline: auto }
+main { padding-block: 0 5rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font: 700 clamp(3rem, 11vw, 6rem)/.96 var(--display); letter-spacing: -.015em; margin: 0 0 1rem; text-wrap: balance }
+.lede { font-size: 1.32rem; line-height: 1.5; color: var(--soft); margin: 0 0 1.2rem }
+.meta { font: 400 .78rem/1.5 var(--mono); color: var(--soft); margin: 0 0 2rem }
+h2 { font: 700 clamp(1.9rem, 5vw, 2.7rem)/1.08 var(--display); margin: 3.6rem 0 .9rem; text-wrap: balance }
+h2 small { display: block; font: 500 .74rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ice); margin-bottom: .55rem }
+h3 { font: 600 1.2rem/1.3 var(--body); margin: 2rem 0 .4rem }
+p { margin: 0 0 1.05rem }
+a { color: var(--ice) }
+code { font: 400 .84em var(--mono); background: var(--code); padding: .08em .3em; border-radius: 2px; overflow-wrap: anywhere }
+pre { background: var(--code); margin: 1.1rem 0 1.3rem; padding: .95rem 1rem; overflow-x: auto; font: 400 .8rem/1.55 var(--mono); border-radius: 2px }
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal }
+.eq { font: italic 400 1.1rem/1.5 var(--body); text-align: center; margin: 1.1rem 0 1.3rem; padding: .6rem .4rem; border-block: 1px solid var(--line); overflow-x: auto }
+.eq sub, .eq sup { font-size: .68em }
+figure { margin: 2rem 0 }
+figcaption { font-size: .92rem; line-height: 1.45; color: var(--soft); margin-top: .55rem }
+.wide { margin-block: 2.4rem }
+.wide img { display: block; width: 100%; height: auto }
+.wide figcaption { max-width: 41rem; margin-inline: auto }
+.table-box { overflow-x: auto; margin: 1.1rem 0 1.4rem }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; line-height: 1.42 }
+th { text-align: left; font: 500 .7rem/1.3 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--soft); border-bottom: 1px solid var(--ink); padding: .4rem .7rem .4rem 0 }
+td { border-bottom: 1px solid var(--line); padding: .5rem .7rem .5rem 0; vertical-align: top; font-variant-numeric: tabular-nums }
+.lab { background: var(--panel); color: var(--panel-ink); padding: 1rem; margin: 1.8rem 0; display: grid; gap: .8rem; border-top: 3px solid var(--ink) }
+.lab-title { font: 500 .74rem/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: 0 }
+.scopes { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem }
+.scope { min-width: 0 }
+.scope span { display: block; font: 400 .66rem/1.4 var(--mono); color: var(--soft); margin-bottom: .2rem }
+canvas { display: block; width: 100%; height: 110px; background: var(--paper) }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .55rem 1.1rem }
+.control { min-width: 0; font: 400 .76rem/1.35 var(--mono); display: grid; gap: .15rem }
+.control-head { display: flex; justify-content: space-between; gap: .6rem }
+.control output { color: var(--ice); white-space: nowrap }
+input[type=range] { width: 100%; accent-color: var(--ice); margin: 0; min-height: 24px }
+select { font: 400 .8rem var(--mono); padding: .35rem; background: var(--paper); color: var(--ink); border: 1px solid var(--line); max-width: 100%; min-height: 36px }
+.checks { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font: 400 .78rem/1.5 var(--mono) }
+.checks label { display: inline-flex; gap: .35rem; align-items: center; min-height: 28px }
+button { font: 500 .8rem/1 var(--mono); cursor: pointer; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); padding: .68rem 1rem; min-height: 40px; border-radius: 2px }
+button:hover { background: var(--ice); border-color: var(--ice) }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--ice); outline-offset: 2px }
+.lab-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .7rem }
+.status { font: 400 .74rem/1.4 var(--mono); color: var(--soft) }
+.note { font-size: .93rem; color: var(--soft); margin: 0 }
+audio { width: 100%; margin-top: .4rem }
+.prompt { margin: 1rem 0 1.5rem; border-left: 3px solid var(--ice); background: var(--panel) }
+.prompt-head { display: flex; justify-content: space-between; align-items: center; gap: .7rem; padding: .55rem .8rem 0; font: 500 .72rem/1.4 var(--mono); color: var(--soft) }
+.prompt button { padding: .4rem .65rem; min-height: 32px; font-size: .7rem; flex: none }
+.prompt pre { background: none; margin: 0; padding: .6rem .8rem .85rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .81rem }
+.refs { font-size: .95rem; padding-left: 1.2rem }
+.refs li { margin-bottom: .45rem }
+@media (max-width: 480px) { .scopes { grid-template-columns: 1fr } body { font-size: 1.08rem } }
+</style>
+</head>
+<body>
+<div class="hero"><img src="img/winter-mountains.jpg" alt="Black and white woodcut of snow streaked mountain ridges under a grey winter sky" width="2400" height="1350"></div>
+<div class="hero-text"><div class="wrap">
+  <h1>Music From Nothing</h1>
+  <p class="lede">How to write a 182-second cold, epic film score with no instruments, no samples and no music software, by understanding what sound is and telling Claude Code exactly what to compute.</p>
+  <p class="meta">A tutorial. Every example plays in your browser, computed live from the formulas on this page. The images were generated by code too.</p>
+</div></div>
+
+<main><div class="wrap">
+
+<p>I majored in physics in science education at the University of Calabar. One of the things I learned was harmonics, along with essentially all of the other BSc material on waves. Now I'm curious about how machines use them.</p>
+
+<p>So I set myself a project. I wanted a theme like the one from Game of Thrones, except mine: low strings, war drums, cold air. A stock track had already got one of my videos taken down, so downloading something else felt like the wrong answer. The result is one JavaScript file with no dependencies. It computes about 17.5 million numbers, one pair for each 48,000th of a second, and writes them to disk. Those numbers are the music.</p>
+
+<p>This article explains why that works, from air pressure up to orchestration. It assumes you can read code, and it does not assume you can read music. It goes deep, because the point is to understand the machine well enough to direct it. Use the labs as you go. A formula you have heard is much harder to forget.</p>
+
+<h2><small>The starting point</small>From the physics class to the machine</h2>
+
+<p>The surprise for anyone who studied physics is how directly it carries over. A computer has no concept of a violin or a drum. It only has the mathematics of waves, written out as loops. Here is how familiar physics shows up in this project's code:</p>
+
+<div class="table-box"><table>
+<tr><th>The physics</th><th>What the machine does</th><th>Where to find it</th></tr>
+<tr><td>Superposition: waves in the same medium add</td><td><code>buf[i] += v</code> adds every sound into one array</td><td>Every part</td></tr>
+<tr><td>Harmonics of a stretched string</td><td>Adds sines at whole-number multiples of a frequency</td><td>Part 2</td></tr>
+<tr><td>Fourier analysis</td><td>Designs a tone by choosing its harmonic amplitudes</td><td>Part 2</td></tr>
+<tr><td>Beats between close frequencies</td><td>Detunes three copies of a note to sound like a group</td><td>Part 5</td></tr>
+<tr><td>Damped oscillation, A e<sup>−t/τ</sup></td><td><code>Math.exp(-t / decay)</code> fades a note or a drum</td><td>Parts 5 and 6</td></tr>
+<tr><td>Vibration of a circular membrane</td><td>Approximated by a falling sine and a burst of noise</td><td>Part 6</td></tr>
+<tr><td>Resonance</td><td>A filter picks out a band of noise, which becomes wind</td><td>Part 6</td></tr>
+<tr><td>Reflection of waves</td><td>Delayed copies fed back into themselves make a room</td><td>Part 7</td></tr>
+</table></div>
+
+<p>What a physics course usually leaves out is the last step. Those equations describe sound continuously, and a machine has to turn them into a finite list of numbers without breaking them. Part 3 covers that step, and it introduces its own physics-like trap, aliasing. The rest of the article builds from those foundations up to a finished score.</p>
+
+<h2><small>First, the obvious question</small>Why not just use Suno?</h2>
+
+<p>Suno and tools like it can give you a finished track from one sentence in under a minute, with convincing strings and even vocals. If all you need is a good track today, use one. This method sounds more synthetic and takes far longer.</p>
+
+<p><b>I went the long way because I wanted to learn what happens behind the scenes.</b> What is music, physically? How does a computer make sound with no instrument? A prompt box would have handed me a song and left those questions exactly where they were. It wouldn't show me why a detuned sawtooth sounds like a section of strings, or what makes a room sound like a room. Getting a track was never the whole goal. Understanding how it gets made was.</p>
+
+<p>Working this way also has some practical side effects, which I only came to appreciate afterwards:</p>
+
+<p><b>Control over every note.</b> In code, "put a drum hit at 38.037 seconds, on the word struck" is a single line, and "move only this note" means changing a single number. When the edit changes, the music recomposes itself to fit. A generated track arrives as a finished recording, and the usual way to change it is to generate again.</p>
+
+<p><b>Everything in it is visible.</b> The track is one readable file with no samples and no trained model behind it. Generators learn from large amounts of existing music, and how that training is licensed has been contested in court. Warner <a href="https://www.thestar.com.my/tech/tech-news/2025/11/26/warner-music-group-settles-copyright-case-with-suno-for-licensed-ai-music">settled with Suno in November 2025</a> and moved to a licensing deal, while <a href="https://www.bostonglobe.com/2026/08/12/business/suno-ai-songs-bmg-deal-copyright/">other disputes have continued</a>.</p>
+
+<p><b>No plan or service to depend on.</b> On <a href="https://suno.com/pricing">Suno's pricing page</a>, the free plan has no commercial rights and the paid plans, from $8 a month, include commercial use, subject to its terms. Those terms have been changing as the licensing deals arrive, so check them yourself if you go that way. This file just runs on my laptop.</p>
+
+<p>This doesn't make my track legally bulletproof. Claude Code wrote much of this code and drafted the melody with me, and copyright law in the US and elsewhere generally looks for human authorship, so how much protection AI-assisted work gets is unsettled. The more of the melody and decisions you make yourself, the better your position should be. Ask a lawyer before you build a business on it. Part 8 comes back to this.</p>
+
+<div class="table-box"><table>
+<tr><th>If you want</th><th>Use</th></tr>
+<tr><td>A realistic track, quickly</td><td>A generator such as Suno</td></tr>
+<tr><td>Vocals or lyrics</td><td>A generator, because this method can't do them believably</td></tr>
+<tr><td>To understand sound and music</td><td>This method</td></tr>
+<tr><td>Music locked to an edit, down to the sample</td><td>This method</td></tr>
+<tr><td>Full control and a track you can read line by line</td><td>This method</td></tr>
+</table></div>
+
+<h2><small>Part 1</small>What sound physically is</h2>
+
+<p>Sound is a travelling disturbance in air pressure. Something pushes air, the air molecules collide with their neighbours, and a region of slightly higher pressure moves outward, followed by a region of slightly lower pressure. The molecules themselves barely go anywhere. Only the pattern travels, at about 343 m/s in air at 20 °C. In one dimension, small pressure changes <i>p</i> obey the wave equation:</p>
+<div class="eq">∂²p/∂t² = c² ∂²p/∂x²</div>
+<p>Two facts from this equation carry the rest of the article. It is linear, so two sounds in the same air simply add. And at any single point, such as your eardrum, the entire sound reduces to one function of time, <i>p(t)</i>: a single number that changes from moment to moment. A symphony reaching one ear is still one wiggling line. <b>If you can compute that line and make a speaker cone follow it, you have made the sound.</b> No instrument is needed in that chain.</p>
+
+<p>The range is huge. The quietest sound a young ear detects near 1 kHz is about 20 micropascals, and a pressure a million times larger is loud enough to hurt. That is why we use a logarithmic scale, decibels, where 20 dB means ten times the pressure. Your ear responds to frequencies from about 20 Hz to 20 kHz, with the top end falling as you age.</p>
+
+<h3>What the ear does with it</h3>
+<p>The eardrum and middle ear pass the vibration into the cochlea, a coiled fluid-filled tube containing the basilar membrane. That membrane is stiff at one end and floppy at the other, so each frequency makes a different place along it vibrate most. About 3,500 inner hair cells along its length turn that motion into nerve signals. In effect, your ear runs a physical frequency analysis before your brain receives anything. This is why the next idea, breaking a sound into frequencies, describes hearing as well as mathematics.</p>
+
+<p>The simplest possible <i>p(t)</i> is a sine wave. Its only properties are amplitude <i>A</i>, frequency <i>f</i> and starting phase <i>φ</i>:</p>
+<div class="eq">p(t) = A · sin(2π f t + φ)</div>
+
+<figure class="lab" id="lab-sine"></figure>
+
+<p>The left panel shows pressure against time. The right panel shows how much energy sits at each frequency, on a logarithmic axis. A pure sine is a single spike. It is also dull, and nothing in nature sounds quite like it. Keep both panels in view as we add things.</p>
+
+<h2><small>Part 2</small>Pitch, timbre and Fourier's idea</h2>
+
+<p>Play the same note on a cello and a trumpet and you can tell them apart instantly. They share a pitch, so what differs? Joseph Fourier showed that any periodic function can be written as a sum of sines at whole-number multiples of a base frequency:</p>
+<div class="eq">p(t) = Σ<sub>n=1…∞</sub> a<sub>n</sub> sin(2π n f t + φ<sub>n</sub>)</div>
+<p>The base frequency <i>f</i> is the <b>fundamental</b>. The multiples 2<i>f</i>, 3<i>f</i>, 4<i>f</i> are the <b>harmonics</b>. Hermann von Helmholtz argued in the 1860s that the balance of those amplitudes is the main source of what we call tone colour, or <b>timbre</b>. Pitch is largely set by the repetition rate, and timbre by the recipe. Vibrating strings and air columns naturally produce near-harmonic series, because they can only hold whole numbers of half-waves. For a string of length <i>L</i>, tension <i>T</i> and mass per unit length <i>μ</i>, the standing waves are:</p>
+<div class="eq">f<sub>n</sub> = (n / 2L) √(T / μ)</div>
+<p>That classroom result is the reason a whole-number series is the right recipe for a computed string. The code never models the length, tension or mass. It jumps straight to the frequencies they would produce.</p>
+
+<p>A bowed string behaves roughly like a sawtooth wave: the bow drags the string, then it slips back quickly. A sawtooth has every harmonic, with amplitude falling as 1/<i>n</i>:</p>
+<div class="eq">saw(t) ∝ Σ<sub>n</sub> (1/n) sin(2π n f t)</div>
+<p>That sum is the strings in this score. Here is the inner loop from <code>score.mjs</code>, and it is exactly that formula:</p>
+<pre><code>for (let h = 1; h &lt; bright &amp;&amp; f * h &lt; 9000; h++) s += Math.sin(phase[k] * h) / h</code></pre>
+
+<figure class="lab" id="lab-harmonics"></figure>
+
+<p>Move the slider from 1 to 40. You are building an instrument from pure sines, and on the right you can see each harmonic arrive. Pitch stays put while the colour changes from flute-like to buzzy. With only odd harmonics the sound turns hollow, closer to a clarinet, for the same physical reason that a tube closed at one end favours odd modes.</p>
+
+<p>Your brain is doing real work here as well. If you remove the fundamental and keep the harmonics, you still hear the same pitch. This is the <b>missing fundamental</b>, and it is why a small speaker that cannot produce 55 Hz can still suggest a bass note. Pitch is something your auditory system infers from the pattern. It is not a simple read-out of the lowest frequency present.</p>
+
+<h2><small>Part 3</small>Turning air into numbers</h2>
+
+<p>A computer cannot store a continuous function, so it stores values of <i>p(t)</i> at regular intervals. This is <b>sampling</b>. The sampling theorem, associated with Nyquist and Shannon, says a signal containing only frequencies below <i>f</i><sub>s</sub>/2 can be perfectly reconstructed from samples taken at rate <i>f</i><sub>s</sub>. Those stair-steps you may have seen in diagrams are misleading, because after reconstruction the output is smooth. This score uses 48,000 samples per second, so the limit, called the Nyquist frequency, is 24 kHz, above human hearing.</p>
+
+<p>Break the rule and frequencies do not vanish. They fold back as false tones, which is called <b>aliasing</b>. A component at frequency <i>f</i> above the limit appears at:</p>
+<div class="eq">f<sub>alias</sub> = | f − f<sub>s</sub> · round(f / f<sub>s</sub>) |</div>
+<p>So a 30 kHz harmonic at a 48 kHz sampling rate is heard at 18 kHz. The obvious way to code a sawtooth, a ramp that resets, has harmonics that never stop, so it always aliases. That is why the score adds up its harmonics by hand and stops at 9 kHz. It costs far more computing, and it stays clean.</p>
+
+<figure class="lab" id="lab-alias"></figure>
+
+<p>Listen to the naive version as the pitch climbs. You will hear strange tones sliding the wrong way, and those are harmonics folding back from above the limit. The band-limited version only rises. Real synthesisers use cheaper methods such as wavetables and BLIT or BLEP oscillators. Summing sines directly is simple and correct, and it is fine when you render offline with no deadline.</p>
+
+<h3>How finely to store each number</h3>
+<p>Each sample is rounded to a limited precision, which adds a small error called <b>quantisation noise</b>. For an <i>N</i>-bit signal at full scale, the signal-to-noise ratio is about:</p>
+<div class="eq">SNR ≈ 6.02 N + 1.76 dB</div>
+<p>At 16 bits that is about 98 dB. The score does all of its calculations in 32-bit floats, then converts to 16-bit integers at the very end. Floats let the mix go far over the final limit in the middle of the work without being damaged.</p>
+
+<p>A WAV file is barely a format at all: a 44-byte header followed by raw numbers. You can check the arithmetic on the real file. 182 seconds × 48,000 samples × 2 channels × 2 bytes = 34,944,000 bytes. Add the 44-byte header and you get 34,944,044, which is the exact size of <code>score.wav</code> on my disk. The script writes that header itself, by hand, with no audio library.</p>
+
+<h2><small>Part 4</small>What music is</h2>
+
+<p>There is no agreed definition of music. The composer Edgard Varèse's phrase "organised sound" is a good working one, and it tells us what to study: how sounds are organised in pitch and in time, and why some of that organisation moves people.</p>
+
+<h3>Pitch: why these notes</h3>
+<p>Pitch perception is roughly logarithmic: going up an octave doubles the frequency, and it feels like the same step wherever you start. Western music divides the octave into 12 equal ratios. Using MIDI note numbers, where 69 is the A at 440 Hz, this gives the single most useful formula in this article. It is also a line of the script:</p>
+<div class="eq">f(m) = 440 · 2<sup>(m − 69) / 12</sup></div>
+<p>Why 12? Because 2<sup>7/12</sup> ≈ 1.4983 lands within about 2 cents (2% of a semitone) of the simple ratio 3:2, called a perfect fifth, and several other simple ratios also come close. It is a compromise that works in every key, and most intervals are slightly out of tune with their pure versions as a result.</p>
+
+<h3>Consonance: why some notes feel right together</h3>
+<p>When two sine tones sit close in frequency, they interfere and the ear hears them as rough. Plomp and Levelt measured this in 1965 and found that roughness peaks when the tones are about a quarter of a critical bandwidth apart. A critical band is the frequency range the ear partly treats as one channel, about 100 Hz wide at low frequencies and about 20% of the frequency higher up. Real notes have many harmonics, so two notes clash wherever their harmonics nearly collide. In a 3:2 fifth, many harmonics land exactly on top of each other, so there is little roughness. In a semitone, they collide all the way up.</p>
+<p>Culture matters too, so this is not the whole story. A 2016 study in <i>Nature</i> (McDermott and colleagues) found that Tsimane' people in Bolivia, with little exposure to Western music, could hear the difference between consonant and dissonant chords and did not prefer the consonant ones. So the physics of roughness is universal, while what feels pleasant is partly learned.</p>
+
+<figure class="lab" id="lab-interval"></figure>
+
+<p>Watch the left panel while you switch between intervals. A pure fifth makes a stable repeating shape. A semitone produces slow pulsing, called beats. Then try the same intervals an octave lower using the register control, where the ear's bands are relatively wider and the clash gets muddier. This is why bass parts stay on wide intervals, and it is why this score's lowest voices play only roots and fifths.</p>
+
+<h3>Time: metre and expectation</h3>
+<p>Rhythm gives the brain something to predict. Leonard Meyer (1956) and David Huron (2006) developed the idea that much of music's emotional force comes from expectation being built, delayed, fulfilled or broken. A steady pulse creates a very strong prediction. When a loud drum lands precisely where you expected it, there is a physical sense of arrival.</p>
+<p>This score is in 3/4, three beats to a bar, at about 96 beats per minute. A bar lasts 1.877 seconds. Three-beat metre has a lilt, a circular feel, where four-beat metre marches. Pairing a waltz-like metre with a low, heavy sound gives it a stately, circling, slightly fatalistic quality. That is a large part of the mood I was asking for.</p>
+
+<h2><small>Part 5</small>Building a string section from a formula</h2>
+
+<p>A sawtooth is still a machine sound. Everything that makes it feel like a bowed string happens over time. These are the four ideas inside the score's <code>bowed()</code> function.</p>
+
+<h3>Phase accumulation</h3>
+<p>The naive oscillator <code>sin(2π f t)</code> breaks the moment the frequency changes, because the phase jumps. What matters is that phase is the running integral of frequency:</p>
+<div class="eq">φ(t) = ∫<sub>0</sub><sup>t</sup> 2π f(τ) dτ</div>
+<p>Discretely, you keep a running total and add a little to it each sample. Vibrato and pitch slides then just work, with no clicks:</p>
+<pre><code>phase[k] += (2 * Math.PI * f * (1 + d) * v) / SR</code></pre>
+
+<h3>Ensemble: many players, never quite together</h3>
+<p>One saw sounds like one synth. A section sounds big because its players are slightly out of tune with each other. The score uses three copies, detuned by −0.4%, 0% and +0.5%, which is about −7 and +9 cents. Two tones separated by Δ<i>f</i> beat at Δ<i>f</i> Hz, so each harmonic pulses at its own rate, and higher harmonics pulse faster. That constantly moving spectrum is what your ear reads as a group of players. Each voice also starts at a random phase, so no two notes begin identically.</p>
+
+<figure class="lab" id="lab-detune"></figure>
+
+<h3>Envelope: how the note starts and ends</h3>
+<p>Your ear identifies instruments heavily from their onset. If you cut the attack off a recorded instrument, it becomes surprisingly hard to name. The score multiplies each note by an envelope: a linear rise, a slow swell standing in for bow pressure, and an exponential tail after release:</p>
+<pre><code>const env = (t &lt; attack ? t / attack : 1)
+          * (t &gt; dur ? Math.exp(-(t - dur) * 9) : 1)
+          * (.85 + .15 * Math.sin(t * 2.1))</code></pre>
+<p>The pulse uses a 25 ms attack, so it bites. The melody uses 300 ms, so it swells. The drones use 2.4 seconds, so you notice them only after they have arrived.</p>
+
+<h3>Filter: the body of the instrument</h3>
+<p>Wood and air absorb high frequencies, and a raw saw has far too many of them. A <b>low-pass filter</b> removes them. The simplest digital version is one line, a moving average that remembers its last output:</p>
+<div class="eq">y[n] = y[n−1] + a · (x[n] − y[n−1]), &nbsp; a ≈ 2π f<sub>c</sub> / f<sub>s</sub></div>
+<p>It rolls off at 6 dB per octave. The score runs two in series for 12 dB per octave and sets the cutoff <i>f</i><sub>c</sub> to 7 times the note's frequency. Tying it to the note keeps the same tone colour up and down the range, which is roughly how a real instrument body behaves. A fixed cutoff would make low notes bright and high notes dull.</p>
+
+<h3>Vibrato: the sign of a human</h3>
+<p>Vibrato is a small, slow change in pitch, here at 5.2 Hz. A real player does not vibrate instantly, so the score fades it in over the first 0.4 seconds:</p>
+<pre><code>const v = 1 + vib * Math.min(1, t / .4) * Math.sin(2 * Math.PI * 5.2 * t)</code></pre>
+
+<figure class="lab" id="lab-bowed"></figure>
+
+<p>Set attack to its shortest, cutoff low and vibrato to zero, and you have a synth. Raise each one in turn and listen for where it starts sounding played. It will not fool a string player. Synthesising a truly realistic violin needs physical modelling, such as digital waveguides, or real samples. For a film-like bed under narration, this is enough.</p>
+
+<h2><small>Part 6</small>Drums and wind</h2>
+
+<p>So far everything has been harmonic. Drums and wind are not, and they need different maths.</p>
+
+<h3>A drum is a falling sine and a burst of noise</h3>
+<p>Hitting a drum skin stretches it and raises its pitch for an instant. The pitch drops as the skin settles. Modes of a circular membrane are also inharmonic (they follow zeros of Bessel functions), which is why a drum has no clear note. The score ignores that full complexity and captures the two things your ear notices most: a sine that falls quickly from about 116 Hz to 46 Hz, plus a very short burst of filtered noise for the impact:</p>
+<div class="eq">f(t) = 46 + 70 e<sup>−28 t</sup> &nbsp; (Hz)</div>
+<pre><code>const s = (Math.sin(ph) * Math.exp(-t / decay) + nz * 1.6 * Math.exp(-t * 40)) * gain</code></pre>
+<p>Notice that the phase is accumulated again, because the frequency is changing.</p>
+
+<figure class="lab" id="lab-drum"></figure>
+
+<h3>Noise, and where randomness comes from</h3>
+<p>Wind is noise, random numbers with energy at every frequency. Code cannot be truly random without outside help, so the score uses a Lehmer generator, one of the oldest and simplest pseudo-random methods, with the constants Park and Miller recommended:</p>
+<pre><code>let seed = 7
+const rand = () =&gt; { seed = (seed * 16807) % 2147483647; return seed / 2147483647 * 2 - 1 }</code></pre>
+<p>Raw noise sounds like static. Wind sounds like wind because the air resonates at frequencies that drift. So the noise passes through a <b>state-variable filter</b> whose centre frequency wanders on slow sine waves between roughly 0 and 780 Hz, and the output is panned gently from side to side. Only two state variables are involved, <code>b1</code> and <code>b2</code>, and the sound comes almost entirely from that moving resonance.</p>
+
+<figure class="lab" id="lab-wind"></figure>
+
+<figure class="wide"><img src="img/winter-score-storm.jpg" alt="Black and white image of wind blown snow in long horizontal streaks" width="2400" height="1350" loading="lazy"><figcaption>This storm is built from the score's own spectrogram, the frequencies of the track over time, warped and smeared sideways until it reads as a blizzard.</figcaption></figure>
+
+<h2><small>Part 7</small>Building a room</h2>
+
+<p>Sound in the real world arrives once directly and then thousands of times off walls. Without that, synthesised audio sounds like it is inside your skull. A computer can build a room from delays. Manfred Schroeder described the classic method in 1962, and this score uses a small version of it.</p>
+<p>A <b>comb filter</b> feeds a delayed copy of the signal back into itself with a gain <i>g</i> below 1, producing a train of fading echoes:</p>
+<div class="eq">H(z) = z<sup>−M</sup> / (1 − g z<sup>−M</sup>)</div>
+<p>The time for its echoes to fall by 60 dB, called T<sub>60</sub>, follows from the delay <i>d</i> and gain:</p>
+<div class="eq">T<sub>60</sub> = −3 d / log<sub>10</sub>(g)</div>
+<p>With <i>g</i> = 0.8 and delays of 29.7 to 45.1 ms, that gives about 0.9 to 1.4 seconds, a medium-sized room. Four combs run in parallel, with delays chosen to avoid simple ratios so their echoes do not line up into a metallic ring. Then two <b>all-pass filters</b> in series smear the echoes more densely in time while leaving the overall frequency balance alone:</p>
+<div class="eq">H(z) = (−g + z<sup>−M</sup>) / (1 − g z<sup>−M</sup>)</div>
+<p>The left and right channels use slightly different delay lengths. Those differences reach each ear separately, and that is most of what makes a mix sound wide. The reverb is 16 lines of code.</p>
+
+<figure class="lab" id="lab-reverb"></figure>
+
+<h2><small>Part 8</small>Composing with code</h2>
+
+<p>Now we have instruments and a room. Next we write the music. Everything here is an instruction like "add this note at this time to this array".</p>
+
+<h3>Why it sounds cold and epic</h3>
+<p>This next table is my reading of the choices, and others might describe them differently. Each row is a decision that can be stated exactly, which is what makes it usable in a prompt:</p>
+<div class="table-box"><table>
+<tr><th>Ingredient</th><th>Exact choice</th><th>Effect</th></tr>
+<tr><td>Metre</td><td>3/4 at about 96 BPM</td><td>Circular, stately motion</td></tr>
+<tr><td>Tonal centre</td><td>D, with minor-sounding melodies</td><td>Dark, serious colour</td></tr>
+<tr><td>Pedal point</td><td>The pulse keeps returning to the root</td><td>Tension that never fully resolves</td></tr>
+<tr><td>Register</td><td>Drones down to about 37 Hz</td><td>Physical weight, felt more than heard</td></tr>
+<tr><td>Melody</td><td>Long notes falling by small steps</td><td>Lament</td></tr>
+<tr><td>Drums</td><td>Sparse, deep hits on bar lines</td><td>Slow, inevitable arrival</td></tr>
+<tr><td>Wind</td><td>Quiet moving noise under everything</td><td>Temperature, an outdoor space</td></tr>
+</table></div>
+
+<h3>The pulse</h3>
+<p>The engine of the track is a six-note repeating pattern, given as distances in semitones from the root. It is one array:</p>
+<pre><code>const STEPS = [0, 12, 0, 10, 0, 7]   // root, octave, root, seventh, root, fifth</code></pre>
+<p>Going back to the root on every other note creates a <b>pedal point</b>. The first note gets the strongest accent, and the fourth gets a lesser one, which puts two gentle groups inside each bar. When the video moves to summer, a single line changes the root from D to F. The pattern stays identical, and the whole mood warms up.</p>
+
+<h3>The melody</h3>
+<p>Each phrase is a list of [bar, beats, MIDI note]. Here is the lament, drafted with Claude Code for this track rather than taken from any song:</p>
+<pre><code>lament: [[0, 3, 57], [1, 3, 58], [2, 2, 57], [2.67, 1.33, 55], [3, 3, 53], [4, 3, 52], [5, 4, 50]]</code></pre>
+<p>That reads A, B flat, A, G, F, E, D. It climbs one step, then walks down a whole scale to home. The B flat rubs against the A beneath it, which gives the opening its ache, and each later note steps closer to rest.</p>
+<p><b>This is the one part that decides whether the track is yours.</b> Copyright in music protects specific expression such as melodies. A mood, a metre and an instrument choice are generally free to use. So everything above can follow a theme you admire, and the notes must be your own. Asking Claude Code to reproduce a famous melody and "change it a bit" gets you an infringing track with extra steps. Write your own phrases, ideally by hand once you understand the notation above. I am not a lawyer, and automatic matching systems can still flag things, so this lowers the risk without removing it.</p>
+
+<h3>Following the picture</h3>
+<p>The score was written to a particular video, so it reads the edit from a file. <code>anchors.json</code> holds the moments that matter, in seconds:</p>
+<pre><code>{"now":2.02,"why":11.87,"main":17.5333,"graphics":31.413,"struck":38.037, ... "end":178.7667}</code></pre>
+<p>The bar length is then adjusted so that bar lines land on the title slam and on the start of the explanation, and a <code>section()</code> function decides how hard each bar plays:</p>
+<pre><code>function section(b) {
+  const t = bar(b)
+  if (bar(b) &lt; MAIN - .01) return { pulse: 1, drums: "hook" }
+  if (t &lt; A.graphics) return { pulse: .45, drums: null }
+  if (t &lt; A.season) return { pulse: .65, drums: "half" }
+  if (t &lt; A.hope) return { pulse: .38, drums: null }
+  return { pulse: .8, drums: "every" }
+}</code></pre>
+<p>This is the great advantage of music as code. Change the edit and the music recomposes itself to fit. A big hit lands on the word "struck" because a line of code says <code>drum(A.struck, .9, { decay: 1.6 })</code>.</p>
+
+<figure class="lab" id="lab-mix"></figure>
+
+<p>Mute each layer to hear what it adds. In this lab, the strings use fewer harmonics than the real track so that it can render in your browser in a few seconds. Here is the real file:</p>
+
+<figure>
+  <audio controls preload="none" src="audio/score-full.mp3"></audio>
+  <figcaption>The finished score: 182 seconds, 92 bars, stereo, MP3 at 192 kbps. Computing it takes about 50 seconds on a laptop.</figcaption>
+</figure>
+
+<figure class="wide"><img src="img/winter-score-skyline.jpg" alt="Black and white image of a jagged dark mountain ridge with streaks of snow against a grey sky" width="2400" height="1350" loading="lazy"><figcaption>The outline of the nearest ridge follows the score's loudness from its first second on the left to its last on the right, with a little added roughness. Quiet sections are valleys.</figcaption></figure>
+
+<h2><small>Part 9</small>Finishing the audio</h2>
+
+<p>Three steps turn a pile of floats into a file people can play.</p>
+<p><b>Normalise.</b> The script finds the loudest sample and scales everything so that peak sits at 0.89, which is 20·log<sub>10</sub>(0.89) ≈ −1 dB below the maximum. It then rounds each value to a 16-bit integer. It skips dither, the tiny noise usually added before this rounding. That is a reasonable shortcut for a track this busy, and a good exercise to add.</p>
+<p><b>Match loudness.</b> Peak level says little about how loud something feels. A short click and a long roar can have the same peak. Loudness is measured in LUFS under the ITU-R BS.1770 standard, which applies a filter shaped like human hearing sensitivity, then averages over 400 ms blocks while ignoring silence. FFmpeg's <code>loudnorm</code> filter aims for a target, here −16 LUFS, while keeping peaks under −1.5 dB. In a single pass it adjusts as it goes, and on this dynamic track I measured the output at about −18.4 LUFS. A two-pass run lands closer to the target.</p>
+<p><b>Compress.</b> MP3 uses <b>psychoacoustic masking</b>. A loud sound hides quieter sounds close to it in frequency and time, so an encoder splits the signal into frequency bands and spends fewer bits on what you are unlikely to hear. That took the 34.9 MB WAV down to 4.4 MB. Part 1's cochlea is the reason this works so well.</p>
+
+<h3>What each tool actually does</h3>
+<div class="table-box"><table>
+<tr><th>Tool</th><th>Its job here</th><th>Does it make the sound?</th></tr>
+<tr><td><b>Claude Code</b></td><td>An AI agent in your terminal. It writes and edits <code>score.mjs</code>, runs it, measures the result and fixes problems</td><td>No, it writes the instructions</td></tr>
+<tr><td><b>Node.js</b></td><td>Runs JavaScript outside a browser. It does all the sums and writes <code>score.wav</code></td><td>Yes, all of it</td></tr>
+<tr><td><b>FFmpeg</b></td><td>A command-line audio and video toolkit. It sets loudness and encodes the MP3</td><td>No, it only processes</td></tr>
+<tr><td><b>Homebrew</b></td><td>A Mac package installer that gets the tools onto your machine</td><td>No</td></tr>
+<tr><td><b>Your ears</b></td><td>The only tool here that can tell whether it is good</td><td>No, and it's the one you can't skip</td></tr>
+</table></div>
+
+<p>No npm packages are involved, and neither are audio libraries or music generation services. The script imports only three things built into Node, for reading files, joining paths and locating itself.</p>
+
+<figure class="wide"><img src="img/winter-forest.jpg" alt="Black and white image of snow covered spruce trees fading into fog across a white field" width="2400" height="1350" loading="lazy"></figure>
+
+<h2><small>Part 10</small>Doing it with Claude Code</h2>
+
+<p>You could write all of this by hand. With Claude Code you describe the music and it writes the code, which means you can work at the level of composer and director, and read the code when you want to learn from it.</p>
+
+<p><b>Know one limit before you begin. Claude cannot hear.</b> It can check numbers: peak levels, loudness, whether a hit lands on the right sample, and it can look at a picture of the spectrum. Whether the result moves anyone is your department. So the working loop is that Claude writes and measures, you listen and describe, and it changes the code. The better your words for what you hear, the better this goes, and Parts 1 to 8 are that vocabulary.</p>
+
+<h3>Set up</h3>
+<pre><code>brew install node ffmpeg
+npm install -g @anthropic-ai/claude-code
+mkdir my-score &amp;&amp; cd my-score
+claude</code></pre>
+<p>That last line starts a session in the folder. If the install command has changed, Anthropic's Claude Code documentation has the current one. Paste the prompts below in order, and listen between each one. They are written to be edited, so change the mood, key, tempo and instruments to your own. They are a clean version of the process, because my real session wandered more than this.</p>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 1: the brief</span><button type="button" class="copy">Copy</button></div><pre>I want to compose an original piece of music entirely in code, as a learning project. Use a single Node.js file called score.mjs with no npm packages. It should compute every audio sample itself and write a 48 kHz, 16-bit stereo WAV by hand, with no audio libraries and no samples.
+
+The mood: cold, epic, like a dark fantasy TV theme. Low strings, deep drums, wind. It must be my own music: don't use or closely imitate the melody of any existing song.
+
+Before writing code, explain your plan in plain language: which sounds you'll build and how each one is calculated. Keep comments in the code that teach me what each part does.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 2: the string voice</span><button type="button" class="copy">Copy</button></div><pre>Build a bowed() function for a string section. Requirements:
+- Sawtooth made by summing harmonics with amplitude 1/h, stopping below 9 kHz so it can't alias.
+- Three detuned voices (about -0.4%, 0, +0.5%) with random starting phases, using phase accumulation.
+- Parameters: start time, duration, MIDI note, gain, attack, brightness, pan, vibrato.
+- Vibrato at about 5 Hz that fades in over 0.4 seconds.
+- A two-stage low-pass filter with its cutoff at 7 times the note's frequency.
+- An exponential release tail.
+
+Then render just one long D (MIDI 50) to test.wav so I can listen to it. Tell me the exact command to play it, and what to listen for.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 3: the pulse and drums</span><button type="button" class="copy">Copy</button></div><pre>Add a driving pulse in 3/4 at about 96 BPM, as six eighth notes per bar on low D (MIDI 38), using the pattern root, octave, root, seventh, root, fifth. Accent the first note most and the fourth note a bit. Use a short attack so it bites.
+
+Add a drum() function: a sine falling quickly from about 116 Hz to 46 Hz, with a short burst of filtered noise on top. Hit it on beat one of every bar, plus a quiet higher hit on beat three.
+
+Add a long low drone on D and A beneath everything, with slow attacks. Render 16 bars and tell me how to play it.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 4: my melody</span><button type="button" class="copy">Copy</button></div><pre>Add a melody as data I can edit myself: a PHRASES object where each phrase is a list of [bar, beats, MIDI note]. Write me two original phrases in D minor as a starting point: a slow descending lament, and a rising question that doesn't resolve. Use long notes with slow attacks and more vibrato than the pulse.
+
+Show me each phrase as note names as well as numbers, and explain how to change them. Check that these are not simply the opening of a well-known tune, and tell me you can't fully guarantee that.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 5: wind and room</span><button type="button" class="copy">Copy</button></div><pre>Add wind: noise from a small seeded random generator, through a state-variable filter whose centre frequency drifts slowly on two sine waves between about 100 and 780 Hz, panning slowly. Keep it quiet.
+
+Add a Schroeder reverb: four parallel feedback combs and two series all-pass filters per channel. Use slightly different delay times left and right, with no simple ratios between them. Aim for a decay of roughly one second, and print the T60 you calculate for each comb. Mix it in at about 30%.
+
+Finally, normalise the whole mix to a peak of -1 dB before converting to 16-bit.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 6: fit it to a video or story</span><button type="button" class="copy">Copy</button></div><pre>Move the timing into anchors.json: a set of named moments in seconds, and the total length. Mine are: [PASTE YOUR MOMENTS, for example title at 11.8, explanation at 17.5, ending at 168, end at 178.7].
+
+Adjust the bar length slightly so bar lines fall on the title and on the explanation, and keep it near 96 BPM. Add a section() function that sets how hard the pulse plays and whether the drums play, for each stretch between moments. It should be strongest at the hook, sparse under narration, and build for the ending. Add big single drum hits on [MOMENTS]. Print the time of every bar so I can check it.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 7: measure, since you can't listen</span><button type="button" class="copy">Copy</button></div><pre>You can't hear this, so check what you can measure and report it plainly:
+1. Peak level, and whether anything clips.
+2. Integrated loudness in LUFS, using ffmpeg's ebur128 filter.
+3. A spectrogram image from ffmpeg's showspectrumpic. Look at it and tell me about any unexpected gaps, or anything piling up below 100 Hz.
+4. Whether the drum hits fall within 20 ms of their anchors.
+
+Then make the MP3:
+ffmpeg -y -i score.wav -af "loudnorm=I=-16:TP=-1.5" -c:a libmp3lame -b:a 192k score-full.mp3
+
+Be clear about what these numbers can't tell us. I'll judge how it sounds.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 8: giving notes after you listen</span><button type="button" class="copy">Copy</button></div><pre>I listened. My notes:
+- [Time, what you hear, and what you want. For example:]
+- 0:12 the drum hit feels weak: make it deeper and longer, keeping its timing.
+- The strings sound like a synth: slower attack, more detune, a darker filter.
+- 0:45 the melody fights with the pulse: lower the pulse there, or move the melody up an octave.
+- The whole thing feels too busy under the narration: drop the drums until the ending.
+
+Change only what these notes need. For each one, tell me which line changed and which physical or musical reason it addresses, so I learn. If you're unsure what I mean, make your best guess and name it so I can correct it.</pre></div>
+
+<div class="prompt"><div class="prompt-head"><span>Prompt 9: teach me this file</span><button type="button" class="copy">Copy</button></div><pre>Don't change anything. Teach me score.mjs. Go through it one function at a time. For each: what sound it makes, the formula behind it, one number I should try changing, and what I'd expect to hear when I do. Stop after each function so I can try it before we go on.</pre></div>
+
+<h3>Words that get better results</h3>
+<div class="table-box"><table>
+<tr><th>When you hear this</th><th>Ask for this</th><th>Why it works</th></tr>
+<tr><td>Thin, like a toy</td><td>More detune, more voices, a lower octave added</td><td>Beating and low harmonics give size</td></tr>
+<tr><td>Harsh, buzzy</td><td>Lower filter cutoff, fewer harmonics</td><td>Removes energy from 2 to 5 kHz, where hearing is most sensitive</td></tr>
+<tr><td>Muddy</td><td>Fewer notes below 200 Hz, wider intervals there</td><td>Low notes collide within one critical band</td></tr>
+<tr><td>Robotic</td><td>Small random timing and level changes per note</td><td>Real players are never exact</td></tr>
+<tr><td>Dry, too close</td><td>More reverb mix, or longer delays</td><td>Adds the reflections of a space</td></tr>
+<tr><td>Clicks at note edges</td><td>Longer attack, fade to zero at the end</td><td>A sudden jump contains every frequency</td></tr>
+<tr><td>Quiet on a phone</td><td>Add higher harmonics to the bass</td><td>Missing fundamental: the brain fills in the low note</td></tr>
+</table></div>
+
+<h2><small>Going further</small>Exercises</h2>
+<p>These go in rough order of difficulty. Each one is a good thing to ask Claude Code to walk you through.</p>
+<div class="table-box"><table>
+<tr><th>Exercise</th><th>What you'll learn</th></tr>
+<tr><td>Change the root from D to E and the metre from 3/4 to 4/4. Describe how the mood changes.</td><td>How much character comes from metre</td></tr>
+<tr><td>Add triangular (TPDF) dither before the 16-bit conversion. Listen to a fade-out at high volume.</td><td>Quantisation noise</td></tr>
+<tr><td>Replace the panning with an equal-power law, using cos and sin of the pan angle.</td><td>Why perceived level dips in the centre</td></tr>
+<tr><td>Add a Karplus-Strong plucked string: a noise burst in a short delay loop with averaging.</td><td>Physical modelling from one simple idea</td></tr>
+<tr><td>Add FM synthesis for a metallic bell, one sine modulating another's phase.</td><td>How inharmonic spectra arise</td></tr>
+<tr><td>Add a Moorer-style low-pass filter inside the reverb's combs.</td><td>Why air makes high frequencies die sooner</td></tr>
+<tr><td>Speed the renderer up with a wavetable instead of calling sin about 4 million times per second per pulse note.</td><td>The compromise real-time synthesisers make</td></tr>
+</table></div>
+
+<h2><small>Sources</small>Further reading</h2>
+<ul class="refs">
+<li>Helmholtz, H. <i>On the Sensations of Tone</i> (1863). The origin of the physical account of timbre and consonance.</li>
+<li>Shannon, C. "Communication in the Presence of Noise". <i>Proceedings of the IRE</i> (1949). The sampling theorem.</li>
+<li>Meyer, L. <i>Emotion and Meaning in Music</i> (1956).</li>
+<li>Schroeder, M. "Natural Sounding Artificial Reverberation". <i>Journal of the Audio Engineering Society</i> (1962).</li>
+<li>Mathews, M. "The Digital Computer as a Musical Instrument". <i>Science</i> (1963). Where computing samples like this began.</li>
+<li>Plomp, R. and Levelt, W. "Tonal Consonance and Critical Bandwidth". <i>JASA</i> (1965).</li>
+<li>Chowning, J. "The Synthesis of Complex Audio Spectra by Means of Frequency Modulation". <i>JAES</i> (1973).</li>
+<li>Moorer, J. "About This Reverberation Business". <i>Computer Music Journal</i> (1979).</li>
+<li>Karplus, K. and Strong, A. "Digital Synthesis of Plucked-String and Drum Timbres". <i>Computer Music Journal</i> (1983).</li>
+<li>Park, S. and Miller, K. "Random Number Generators: Good Ones Are Hard to Find". <i>Communications of the ACM</i> (1988).</li>
+<li>Roads, C. <i>The Computer Music Tutorial</i> (1996). The standard textbook if you want to go further.</li>
+<li>Stilson, T. and Smith, J. "Alias-Free Digital Synthesis of Classic Analog Waveforms". <i>ICMC</i> (1996).</li>
+<li>Huron, D. <i>Sweet Anticipation</i> (2006).</li>
+<li>McDermott, J. et al. "Indifference to Dissonance in Native Amazonians Reveals Cultural Variation in Music Perception". <i>Nature</i> (2016).</li>
+<li>ITU-R BS.1770. The international standard for measuring loudness.</li>
+</ul>
+
+</div></main>
+
+<script>
+const SR = 48000
+const hz = (m) => 440 * Math.pow(2, (m - 69) / 12)
+const buf = (sec) => { const n = Math.ceil(sec * SR); return [new Float32Array(n), new Float32Array(n)] }
+const add = (b, i, v) => { if (i >= 0 && i < b.length) b[i] += v }
+let seed = 7
+const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 * 2 - 1 }
+
+function bowed(out, t0, dur, midi, gain, o = {}) {
+  const { attack = .05, bright = 26, pan = 0, vib = .004, cutMul = 7, detune = [-.004, 0, .005] } = o
+  const [L, R] = out, f = hz(midi)
+  const s0 = Math.floor(t0 * SR), n = Math.floor((dur + .35) * SR)
+  const phase = detune.map(() => Math.random() * 6.28)
+  let lp1 = 0, lp2 = 0
+  const cut = Math.min(.45, (f * cutMul) / SR * 6.28)
+  let maxH = 1
+  while (maxH < bright && f * maxH < 9000) maxH++
+  for (let i = 0; i < n; i++) {
+    const t = i / SR
+    const env = (t < attack ? t / attack : 1) * (t > dur ? Math.exp(-(t - dur) * 9) : 1) * (.85 + .15 * Math.sin(t * 2.1))
+    const v = 1 + vib * Math.min(1, t / .4) * Math.sin(2 * Math.PI * 5.2 * t)
+    let s = 0
+    for (let k = 0; k < detune.length; k++) {
+      phase[k] += (2 * Math.PI * f * (1 + detune[k]) * v) / SR
+      for (let h = 1; h < maxH; h++) s += Math.sin(phase[k] * h) / h
+    }
+    s /= detune.length
+    lp1 += cut * (s - lp1); lp2 += cut * (lp1 - lp2)
+    const y = lp2 * env * gain
+    add(L, s0 + i, y * (1 - pan) * .9); add(R, s0 + i, y * (1 + pan) * .9)
+  }
+}
+function drum(out, t0, gain, { low = 46, drop = 70, decay = 1.1, skin = 1.6 } = {}) {
+  const [L, R] = out, s0 = Math.floor(t0 * SR), n = Math.floor(decay * 2.5 * SR)
+  let ph = 0, nz = 0
+  for (let i = 0; i < n; i++) {
+    const t = i / SR
+    ph += (2 * Math.PI * (low + drop * Math.exp(-t * 28))) / SR
+    nz += .2 * (rand() - nz)
+    const s = (Math.sin(ph) * Math.exp(-t / decay) + nz * skin * Math.exp(-t * 40)) * gain
+    add(L, s0 + i, s); add(R, s0 + i, s)
+  }
+}
+function wind(out, level, speed = 1, q = .45) {
+  const [L, R] = out; let b1 = 0, b2 = 0
+  for (let i = 0; i < L.length; i++) {
+    const t = i / SR
+    const fc = 380 + 260 * Math.sin(t * .7 * speed) + 140 * Math.sin(t * 1.9 * speed)
+    const w = (2 * Math.PI * fc) / SR
+    b2 += w * b1
+    b1 += w * (rand() - b2 - q * b1)
+    const g = level * Math.min(1, t / .6) * (.6 + .4 * Math.sin(t * .9 * speed))
+    L[i] += b1 * g * (1 + .3 * Math.sin(t * .5)); R[i] += b1 * g * (1 - .3 * Math.sin(t * .5))
+  }
+}
+function schroeder(x, delays, mix, g = .8) {
+  const y = new Float32Array(x.length)
+  const combs = delays.map((d) => ({ b: new Float32Array(Math.floor(d * SR)), i: 0 }))
+  for (let n = 0; n < x.length; n++) {
+    let s = 0
+    for (const c of combs) { const o = c.b[c.i]; c.b[c.i] = x[n] + o * g; c.i = (c.i + 1) % c.b.length; s += o }
+    y[n] = s / combs.length
+  }
+  for (const d of [.0051, .0017]) {
+    const b = new Float32Array(Math.floor(d * SR)); let i = 0
+    for (let n = 0; n < x.length; n++) { const o = b[i]; const v = y[n] + o * .5; b[i] = v; y[n] = o - v * .5; i = (i + 1) % b.length }
+  }
+  for (let n = 0; n < x.length; n++) x[n] = x[n] * (1 - mix) + y[n] * mix * 1.6
+}
+const room = (out, mix, g) => { schroeder(out[0], [.0297, .0371, .0411, .0437], mix, g); schroeder(out[1], [.0311, .0353, .0429, .0451], mix, g) }
+const fadeEdges = (out) => { for (const b of out) { const m = Math.min(1200, b.length >> 2); for (let i = 0; i < m; i++) { const g = i / m; b[i] *= g; b[b.length - 1 - i] *= g } } }
+
+let ctx = null, current = null, currentBtn = null
+function stopCurrent() {
+  if (current) { current.onended = null; try { current.stop() } catch (e) { /* already stopped */ } current = null }
+  if (currentBtn) { currentBtn.textContent = currentBtn.dataset.label; currentBtn = null }
+}
+async function play(out, btn) {
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)()
+  await ctx.resume()
+  stopCurrent()
+  let peak = 1e-6
+  for (const b of out) for (let i = 0; i < b.length; i++) peak = Math.max(peak, Math.abs(b[i]))
+  const k = .8 / peak
+  const a = ctx.createBuffer(2, out[0].length, SR)
+  out.forEach((b, c) => { const d = a.getChannelData(c); for (let i = 0; i < b.length; i++) d[i] = b[i] * k })
+  const src = ctx.createBufferSource()
+  src.buffer = a; src.connect(ctx.destination); src.start()
+  current = src; currentBtn = btn; btn.textContent = "Stop"
+  src.onended = () => { if (current === src) stopCurrent() }
+}
+function fft(re, im) {
+  const n = re.length
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1
+    for (; j & bit; bit >>= 1) j ^= bit
+    j ^= bit
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]] }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang)
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0
+      for (let j = 0; j < len / 2; j++) {
+        const a = i + j, b = a + len / 2
+        const xr = re[b] * cr - im[b] * ci, xi = re[b] * ci + im[b] * cr
+        re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr
+      }
+    }
+  }
+}
+const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+function sizeCanvas(c) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth || 300, h = c.clientHeight || 110
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr)
+  const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h)
+  return { g, w, h }
+}
+function drawWave(c, x, ms) {
+  const { g, w, h } = sizeCanvas(c)
+  g.strokeStyle = token("--line"); g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke()
+  if (!x) return
+  const span = Math.min(x.length - 1, Math.floor(ms / 1000 * SR))
+  let start = Math.min(x.length >> 2, Math.max(0, x.length - span - 1))
+  const stop = Math.min(x.length - span - 2, start + 6000)
+  for (let i = start; i < stop; i++) if (x[i] <= 0 && x[i + 1] > 0) { start = i; break }
+  let peak = 1e-6
+  for (let i = start; i < start + span; i++) peak = Math.max(peak, Math.abs(x[i]))
+  g.strokeStyle = token("--trace"); g.lineWidth = 1.3; g.beginPath()
+  for (let px = 0; px <= w; px++) {
+    const v = x[start + Math.floor(px / w * span)] / peak
+    const y = h / 2 - v * (h / 2 - 5)
+    if (px === 0) g.moveTo(px, y); else g.lineTo(px, y)
+  }
+  g.stroke()
+}
+function drawSpec(c, x) {
+  const { g, w, h } = sizeCanvas(c)
+  const N = 8192, lo = 30, hi = 18000, xOf = (f) => Math.log(f / lo) / Math.log(hi / lo) * w
+  g.fillStyle = token("--soft"); g.strokeStyle = token("--line"); g.font = "10px " + token("--mono")
+  for (const [f, label] of [[100, "100 Hz"], [1000, "1 kHz"], [10000, "10 kHz"]]) {
+    const px = xOf(f); g.beginPath(); g.moveTo(px, 0); g.lineTo(px, h); g.stroke(); g.fillText(label, Math.min(px + 3, w - 40), 11)
+  }
+  if (!x || x.length < N) { if (!x) return }
+  const re = new Float64Array(N), im = new Float64Array(N)
+  const off = Math.max(0, Math.min(x.length - N, Math.floor(x.length * .35)))
+  for (let i = 0; i < N && off + i < x.length; i++) re[i] = x[off + i] * (.5 - .5 * Math.cos(2 * Math.PI * i / (N - 1)))
+  fft(re, im)
+  const mag = new Float64Array(N / 2); let top = 1e-9
+  for (let i = 1; i < N / 2; i++) { mag[i] = Math.hypot(re[i], im[i]); top = Math.max(top, mag[i]) }
+  const col = new Float64Array(Math.ceil(w) + 1)
+  for (let i = 1; i < N / 2; i++) {
+    const f = i * SR / N; if (f < lo || f > hi) continue
+    const px = Math.floor(xOf(f)); col[px] = Math.max(col[px], mag[i])
+  }
+  g.fillStyle = token("--ice")
+  for (let px = 0; px < col.length; px++) {
+    if (!col[px]) continue
+    const db = 20 * Math.log10(col[px] / top), bar = Math.max(0, (db + 70) / 70) * (h - 14)
+    g.fillRect(px, h - bar, Math.max(1, 1), bar)
+  }
+}
+const pct = (v) => v.toFixed(2) + "%"
+const LABS = {
+  "lab-sine": {
+    title: "Lab 1: one sine wave", ms: 20,
+    sliders: [{ key: "note", label: "Pitch", min: 33, max: 93, step: 1, val: 57, fmt: (v) => hz(v).toFixed(1) + " Hz" }, { key: "amp", label: "Amplitude", min: .05, max: 1, step: .01, val: .7, fmt: (v) => (20 * Math.log10(v)).toFixed(1) + " dB" }],
+    render: (p) => { const out = buf(1.4), f = hz(p.note); for (let i = 0; i < out[0].length; i++) { const s = p.amp * Math.sin(2 * Math.PI * f * i / SR); out[0][i] = s; out[1][i] = s } fadeEdges(out); return out },
+    raw: true,
+  },
+  "lab-harmonics": {
+    title: "Lab 2: build a sawtooth, harmonic by harmonic", ms: 20,
+    sliders: [{ key: "n", label: "Harmonics", min: 1, max: 40, step: 1, val: 6, fmt: (v) => String(v) }],
+    select: { key: "kind", label: "Recipe", options: [["all", "All harmonics, 1/n (sawtooth, like a bow)"], ["odd", "Odd harmonics only, 1/n (square, hollow)"]], val: "all" },
+    render: (p) => { const out = buf(1.6), f = 110; for (let i = 0; i < out[0].length; i++) { let s = 0; for (let h = 1, c = 0; c < p.n; h++) { if (p.kind === "odd" && h % 2 === 0) continue; c++; if (f * h >= 20000) break; s += Math.sin(2 * Math.PI * f * h * i / SR) / h } out[0][i] = s; out[1][i] = s } fadeEdges(out); return out },
+  },
+  "lab-alias": {
+    title: "Lab 3: hear aliasing", ms: 5,
+    select: { key: "kind", label: "Oscillator", options: [["naive", "Naive sawtooth (ramp and reset)"], ["clean", "Band-limited sawtooth (summed sines)"]], val: "naive" },
+    note: "A pitch glide from 800 Hz to 6 kHz. It is fairly loud in the high range, so start with your volume low.",
+    render: (p) => { const out = buf(3), n = out[0].length; let ph = 0; for (let i = 0; i < n; i++) { const f = 800 * Math.pow(6000 / 800, i / n); ph += f / SR; let s = 0; if (p.kind === "naive") s = 2 * (ph % 1) - 1; else { for (let h = 1; f * h < 20000; h++) s += Math.sin(2 * Math.PI * ph * h) / h * .64 } out[0][i] = s * .5; out[1][i] = s * .5 } fadeEdges(out); return out },
+  },
+  "lab-interval": {
+    title: "Lab 4: why some notes agree", ms: 60,
+    select: { key: "iv", label: "Interval", options: [["12", "Octave (2:1)"], ["7", "Perfect fifth, equal tempered"], ["pure", "Perfect fifth, pure 3:2"], ["3", "Minor third"], ["6", "Tritone"], ["1", "Semitone"]], val: "7" },
+    sliders: [{ key: "root", label: "Register", min: 33, max: 69, step: 12, val: 57, fmt: (v) => hz(v).toFixed(0) + " Hz root" }],
+    render: (p) => { const out = buf(2.2), f1 = hz(p.root), f2 = p.iv === "pure" ? f1 * 1.5 : f1 * Math.pow(2, Number(p.iv) / 12); for (let i = 0; i < out[0].length; i++) { let s = 0; for (let h = 1; h <= 8; h++) s += (Math.sin(2 * Math.PI * f1 * h * i / SR) + Math.sin(2 * Math.PI * f2 * h * i / SR)) / h; out[0][i] = s; out[1][i] = s } fadeEdges(out); return out },
+  },
+  "lab-detune": {
+    title: "Lab 5: one player becomes a section", ms: 40,
+    sliders: [{ key: "d", label: "Detune each side", min: 0, max: 1.5, step: .01, val: .45, fmt: pct }],
+    render: (p) => { const out = buf(3); const d = p.d / 100; bowed(out, .05, 2.5, 50, .6, { attack: .12, detune: d === 0 ? [0] : [-d, 0, d * 1.1], vib: 0 }); return out },
+  },
+  "lab-bowed": {
+    title: "Lab 6: from synth to something played", ms: 40,
+    sliders: [{ key: "a", label: "Attack", min: .005, max: 1, step: .005, val: .3, fmt: (v) => Math.round(v * 1000) + " ms" }, { key: "cut", label: "Filter cutoff", min: 1, max: 20, step: .5, val: 7, fmt: (v) => v + " × note" }, { key: "vib", label: "Vibrato depth", min: 0, max: 1.5, step: .05, val: .6, fmt: pct }],
+    select: { key: "note", label: "Note", options: [["57", "A (the lament's first note)"], ["50", "D, lower"], ["45", "A, low"]], val: "57" },
+    render: (p) => { const out = buf(3.2); bowed(out, .03, 2.6, Number(p.note), .6, { attack: p.a, cutMul: p.cut, vib: p.vib / 100, bright: 22 }); room(out, .2); return out },
+  },
+  "lab-drum": {
+    title: "Lab 7: a drum from one line of maths", ms: 120,
+    sliders: [{ key: "low", label: "Resting pitch", min: 30, max: 120, step: 1, val: 46, fmt: (v) => v + " Hz" }, { key: "drop", label: "Pitch drop", min: 0, max: 200, step: 1, val: 70, fmt: (v) => "+" + v + " Hz" }, { key: "decay", label: "Decay", min: .1, max: 2.2, step: .05, val: 1.1, fmt: (v) => v.toFixed(2) + " s" }, { key: "skin", label: "Skin noise", min: 0, max: 3, step: .1, val: 1.6, fmt: (v) => v.toFixed(1) }],
+    render: (p) => { const out = buf(p.decay * 2.5 + .1); seed = 7; drum(out, .02, .9, p); fadeEdges(out); return out },
+  },
+  "lab-wind": {
+    title: "Lab 8: wind from random numbers", ms: 300,
+    sliders: [{ key: "speed", label: "How fast it moves", min: .3, max: 6, step: .1, val: 2, fmt: (v) => v.toFixed(1) + "×" }, { key: "q", label: "Damping (lower is whistlier)", min: .05, max: 1.5, step: .05, val: .45, fmt: (v) => v.toFixed(2) }],
+    render: (p) => { const out = buf(5); seed = 7; wind(out, .11, p.speed, p.q); fadeEdges(out); return out },
+  },
+  "lab-reverb": {
+    title: "Lab 9: build a room", ms: 900,
+    sliders: [{ key: "mix", label: "Reverb mix", min: 0, max: .8, step: .01, val: .32, fmt: (v) => Math.round(v * 100) + "%" }, { key: "g", label: "Comb feedback g", min: .3, max: .95, step: .01, val: .8, fmt: (v) => v.toFixed(2) }],
+    note: "The source is a drum and a short phrase. Decay readouts use the 37 ms comb as a reference.",
+    extra: (p) => "T60 about " + (-3 * .037 / Math.log10(p.g)).toFixed(2) + " s",
+    render: (p) => { const out = buf(4); seed = 7; drum(out, .05, .6, { decay: .5 }); [[.6, 57], [1, 60], [1.4, 62]].forEach(([t, m]) => bowed(out, t, .22, m, .45, { attack: .012, bright: 16, vib: 0 })); room(out, p.mix, p.g); fadeEdges(out); return out },
+  },
+  "lab-mix": {
+    title: "Lab 10: the whole score, six bars of it", ms: 900, manual: true,
+    checks: [["wind", "Wind"], ["drone", "Drone"], ["pulse", "Pulse"], ["melody", "Melody"], ["drums", "Drums"], ["room", "Room"]],
+    select: { key: "root", label: "Root of the pulse", options: [["38", "D (winter)"], ["41", "F (summer)"]], val: "38" },
+    render: (p) => {
+      const BAR = 1.877, bars = 6, out = buf(BAR * bars + 2.4), r = Number(p.root)
+      seed = 7
+      if (p.wind) wind(out, .11, 1)
+      if (p.drone) { bowed(out, 0, BAR * bars, r - 12, .22, { attack: 1.2, bright: 12, vib: 0 }); bowed(out, .3, BAR * bars, r - 5, .1, { attack: 1.2, bright: 10, vib: 0, pan: .25 }) }
+      if (p.pulse) for (let b = 0; b < bars; b++) [0, 12, 0, 10, 0, 7].forEach((step, k) => bowed(out, b * BAR + k * BAR / 6, BAR / 6 * .92, r + step, .26 * (k === 0 ? 1 : k === 3 ? .8 : .62), { attack: .025, bright: 14, vib: .002, pan: -.25 }))
+      if (p.melody) [[0, 3, 57], [1, 3, 58], [2, 2, 57], [2.67, 1.33, 55], [3, 3, 53], [4, 3, 52], [5, 3, 50]].forEach(([b, beats, m]) => bowed(out, b * BAR, beats * BAR / 3, m, .2, { attack: .3, bright: 14, vib: .006, pan: .3 }))
+      if (p.drums) for (let b = 0; b <= bars; b++) { drum(out, b * BAR, b === 0 || b === bars ? .95 : .55); if (b < bars) drum(out, b * BAR + 2 * BAR / 3, .3, { low: 58, decay: .5 }) }
+      if (p.room) room(out, .32)
+      fadeEdges(out)
+      return out
+    },
+  },
+}
+function buildLab(id, cfg) {
+  const root = document.getElementById(id)
+  if (!root) return
+  const state = {}
+  root.innerHTML = '<p class="lab-title"></p><div class="scopes"><div class="scope"><span>Pressure over time</span><canvas class="w"></canvas></div><div class="scope"><span>Energy by frequency</span><canvas class="s"></canvas></div></div><div class="controls"></div><div class="lab-actions"><button type="button">Play</button><span class="status" aria-live="polite"></span></div>'
+  root.querySelector(".lab-title").textContent = cfg.title
+  const controls = root.querySelector(".controls"), btn = root.querySelector("button"), status = root.querySelector(".status")
+  const cw = root.querySelector("canvas.w"), cs = root.querySelector("canvas.s")
+  btn.dataset.label = cfg.manual ? "Render and play" : "Play"
+  btn.textContent = btn.dataset.label
+  let last = null, timer = 0
+  const extra = () => { status.textContent = cfg.extra ? cfg.extra(state) : "" }
+  const redraw = () => { drawWave(cw, last && last[0], cfg.ms); drawSpec(cs, last && last[0]) }
+  const refresh = () => { if (cfg.manual) { last = null; redraw(); return } try { last = cfg.render(state) } catch (e) { last = null; status.textContent = "This example couldn't render: " + e.message } redraw() }
+  const changed = () => { extra(); stopCurrent(); clearTimeout(timer); timer = setTimeout(refresh, 90) }
+  ;(cfg.sliders || []).forEach((s) => {
+    state[s.key] = s.val
+    const box = document.createElement("label"); box.className = "control"; box.htmlFor = id + "-" + s.key
+    box.innerHTML = '<span class="control-head"><span></span><output></output></span><input type="range">'
+    box.querySelector("span span").textContent = s.label
+    const out = box.querySelector("output"), input = box.querySelector("input")
+    Object.assign(input, { id: id + "-" + s.key, min: s.min, max: s.max, step: s.step, value: s.val })
+    out.textContent = s.fmt(s.val)
+    input.addEventListener("input", () => { state[s.key] = Number(input.value); out.textContent = s.fmt(state[s.key]); changed() })
+    controls.append(box)
+  })
+  if (cfg.select) {
+    const s = cfg.select; state[s.key] = s.val
+    const box = document.createElement("label"); box.className = "control"; box.htmlFor = id + "-" + s.key
+    box.innerHTML = '<span class="control-head"><span></span></span><select></select>'
+    box.querySelector("span span").textContent = s.label
+    const sel = box.querySelector("select"); sel.id = id + "-" + s.key
+    s.options.forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.append(o) })
+    sel.value = s.val
+    sel.addEventListener("change", () => { state[s.key] = sel.value; changed() })
+    controls.append(box)
+  }
+  if (cfg.checks) {
+    const row = document.createElement("div"); row.className = "checks"
+    cfg.checks.forEach(([k, t]) => {
+      state[k] = true
+      const lab = document.createElement("label"); const c = document.createElement("input")
+      c.type = "checkbox"; c.checked = true; c.id = id + "-" + k
+      c.addEventListener("change", () => { state[k] = c.checked; changed() })
+      lab.append(c, document.createTextNode(t)); row.append(lab)
+    })
+    controls.append(row)
+  }
+  if (cfg.note) { const n = document.createElement("p"); n.className = "note"; n.textContent = cfg.note; root.insertBefore(n, root.querySelector(".lab-actions")) }
+  btn.addEventListener("click", () => {
+    if (currentBtn === btn) { stopCurrent(); return }
+    const go = () => {
+      try { if (!last) last = cfg.render(state); redraw(); extra(); play(last, btn).catch(() => { status.textContent = "Your browser didn't allow audio. Try tapping Play again." }) }
+      catch (e) { status.textContent = "This example couldn't render: " + e.message }
+    }
+    if (cfg.manual && !last) { status.textContent = "Rendering, this takes a few seconds"; btn.disabled = true; setTimeout(() => { go(); btn.disabled = false }, 40) } else go()
+  })
+  extra()
+  root.redraw = redraw
+  if (cfg.manual) { redraw(); status.textContent = "Rendered when you press the button, since it computes millions of sines" }
+  else setTimeout(refresh, 30)
+}
+Object.entries(LABS).forEach(([id, cfg], i) => setTimeout(() => buildLab(id, cfg), i * 25))
+const redrawAll = () => document.querySelectorAll(".lab").forEach((l) => l.redraw && l.redraw())
+let resizeTimer = 0
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(redrawAll, 150) })
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawAll)
+new MutationObserver(redrawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] })
+document.querySelectorAll(".copy").forEach((b) => b.addEventListener("click", async () => {
+  const pre = b.closest(".prompt").querySelector("pre")
+  try { await navigator.clipboard.writeText(pre.textContent); b.textContent = "Copied" }
+  catch (e) { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected, press copy" }
+  setTimeout(() => { b.textContent = "Copy" }, 1800)
+}))
+</script>
+</body>
+</html>
